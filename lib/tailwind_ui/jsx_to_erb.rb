@@ -54,8 +54,9 @@ module TailwindUi
       template_body.sub!(")}", "<% end %>")
       template_body.sub!("))}", "<% end %>")
 
+      raise "braces remaining" if template_body.include?("{") || template_body.include?("}")
+
       template_body.lines.map { _1.gsub(/^    /, "") }.join
-      # raise "braces remaining" if final.include?("{") || final.include?("}")
     end
 
     def data
