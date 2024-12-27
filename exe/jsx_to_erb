@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+
+require "bundler"
+Bundler.setup
+
+require "tailwind_ui/jsx_to_erb"
+
+puts TailwindUi::JsxToErb.from_path(ARGV[0]).full
