@@ -25,4 +25,14 @@ class JsxToErbTest < Minitest::Test
 
     assert_equal expected, result
   end
+
+  def test_against_real_tailwind_ui
+    skip "Skipping since SOURCE_PATH is not set" unless ENV["SOURCE_PATH"]
+
+    Dir.glob("#{ENV.fetch("SOURCE_PATH")}/**/*.jsx").each do |path|
+      TailwindUi::JsxToErb.from_path(path).full
+    rescue TailwindUi::NotYetSupported
+      next
+    end
+  end
 end
