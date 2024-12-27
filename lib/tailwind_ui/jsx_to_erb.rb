@@ -23,11 +23,16 @@ module TailwindUi
     def full
       tags = @file_contents.match(/(?<tags> *<.*>)/m)[:tags]
       result = without_indentation(tags)
+      result = with_class_name_conversion(result)
       ERB.new(result).result
       result
     end
 
     private
+
+    def with_class_name_conversion(markup)
+      markup.gsub!(/className="([^"]+)"/, 'class="\1"')
+    end
 
     def without_indentation(tags)
       indentation_level = tags.index("<")
