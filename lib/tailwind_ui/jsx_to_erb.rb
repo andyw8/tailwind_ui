@@ -6,7 +6,7 @@ module TailwindUi
     def self.from_path(path)
       file_contents = File.read(path)
       new(file_contents)
-    rescue StandardError => e
+    rescue => e
       raise Error, e.message
     end
 

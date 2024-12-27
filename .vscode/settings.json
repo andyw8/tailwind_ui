@@ -1,0 +1,6 @@
+{
+    "rubyLsp.linters": [
+        "standard"
+    ],
+    "rubyLsp.formatter": "standard"
+}
