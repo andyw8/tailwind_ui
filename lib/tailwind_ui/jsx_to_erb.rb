@@ -1,4 +1,5 @@
 require "json"
+require "nokogiri"
 
 module TailwindUi
   class JsxToErb
@@ -16,16 +17,24 @@ module TailwindUi
     end
 
     def array_ruby
+      return nil unless js_match
+
+      # raise "no js_match" unless js_match
+
       arr_raw = js_match[2]
       arr_raw.gsub!("null", "nil")
       arr_raw.gsub!(%r{// More .*\.\.\.}, " # More ...") if arr_raw.include?("// More")
 
       eval arr_raw
+      # rescue Exception => e
+      #   binding.irb
     end
 
     def full
       html # need to call first due to order dependency
-      result = "<% #{data} %>"
+      result = ""
+      # binding.irb
+      result += "<% #{data} %>" if js_match
       result += "\n\n\n"
       result += html
     end
@@ -33,7 +42,8 @@ module TailwindUi
     def html
       # probably better: https://gemini.google.com/app/aac8b4e213a6e06a
 
-      template_body_original = file_contents.match(/return \(\n(.*>)/m)[1]
+      # template_body_original = file_contents.match(/return \(\n(.*>)/m)[1]
+      template_body_original = file_contents.match(/return \(?(.*>)\)?/m)[1]
 
       template_body = convert_camelcase(template_body_original)
 
@@ -41,9 +51,11 @@ module TailwindUi
       template_body.gsub!("&lt;", "<")
       template_body.gsub!("&gt;", ">")
 
-      @plural = js_match[1]
+      if js_match
+        @plural = js_match[1]
 
-      singular = template_body.match(/#{plural}\.map\(\((.*)\)/)[1]
+        singular = template_body.match(/#{plural}\.map\(\((.*)\)/)[1]
+      end
 
       convert_to_ruby_hash!(file_contents, template_body)
 
@@ -54,12 +66,14 @@ module TailwindUi
       template_body.sub!(")}", "<% end %>")
       template_body.sub!("))}", "<% end %>")
 
-      raise "braces remaining" if template_body.include?("{") || template_body.include?("}")
+      # raise "braces remaining" if template_body.include?("{") || template_body.include?("}")
 
       template_body.lines.map { _1.gsub(/^    /, "") }.join
     end
 
     def data
+      return "" unless array_ruby
+
       "#{plural} = #{JSON.pretty_generate(array_ruby)}"
     end
 

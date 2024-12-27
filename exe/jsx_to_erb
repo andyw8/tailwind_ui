@@ -3,13 +3,6 @@
 require "bundler"
 Bundler.setup
 
-require "pp"
-require "nokogiri"
 require "tailwind_ui/jsx_to_erb"
 
-jsx_to_erb = TailwindUi::JsxToErb.new(ARGV[0])
-html = jsx_to_erb.html
-puts "<% #{jsx_to_erb.data} %>"
-puts
-puts
-puts html
+puts TailwindUi::JsxToErb.from_path(ARGV[0]).full

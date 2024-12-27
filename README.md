@@ -14,7 +14,19 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 ## Usage
 
-TBC
+The gem provides a command-line executable `jsx_to_erb`.
+
+Begin by saving the JSX template from tailwindui.com to a local file. Then
+
+```
+bundle exec jsx_to_erb JSX_INPUT_PATH
+```
+
+Use redirection to write the output to a file, for example:
+
+```
+bundle exec jsx_to_erb JSX_INPUT_PATH > app/views/_simple.html.erb
+```
 
 ## Development
 
