@@ -8,6 +8,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     ast (2.4.2)
+    dotenv (3.1.7)
     json (2.9.1)
     language_server-protocol (3.17.0.3)
     mini_portile2 (2.8.8)
@@ -47,6 +48,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  dotenv
   minitest (~> 5.16)
   rake (~> 13.0)
   rubocop (~> 1.21)
