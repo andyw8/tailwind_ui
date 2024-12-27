@@ -1,3 +1,5 @@
+require "erb"
+
 module TailwindUi
   class Error < StandardError
   end
@@ -16,7 +18,9 @@ module TailwindUi
 
     def full
       tags = @file_contents.match(/(?<tags> *<.*>)/m)[:tags]
-      without_indentation(tags)
+      result = without_indentation(tags)
+      ERB.new(result).result
+      result
     end
 
     private
