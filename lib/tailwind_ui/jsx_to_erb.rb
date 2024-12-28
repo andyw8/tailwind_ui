@@ -1,4 +1,5 @@
 require "erb"
+require "nokogiri"
 
 module TailwindUi
   class Error < StandardError
@@ -43,6 +44,8 @@ module TailwindUi
       result = without_indentation(tags)
       result = handle_style_attributes(result)
       result = with_jsx_keywords_updated(result)
+      result = convert_camelcase_attributes(result)
+      check_for_missed_camel_case_tags!(result)
       result = handle_jsx_comments(result)
       result = handle_brace_attributes(result)
       result = handle_inner_braces(result)
@@ -54,6 +57,36 @@ module TailwindUi
     end
 
     private
+
+    def convert_camelcase_attributes(markup)
+      result = markup
+      {
+        autoComplete: "autocomplete",
+        dateTime: "datetime",
+        defaultValue: "value",
+        fillOpacity: "fill-opacity",
+        gradientUnits: "gradient-units",
+        preserveAspectRatio: "preserve-aspect-ratio",
+        stopColor: "stop-color",
+        viewBox: "view-box"
+      }.each do |(camel_case, normal)|
+        result = result.gsub(camel_case.to_s, normal)
+      end
+      result
+    end
+
+    CAMEL_CASE = /^[a-zA-Z]+([A-Z][a-z]+)+$/
+
+    def check_for_missed_camel_case_tags!(str)
+      # Need to specify XML here to avoid Nokgiri downcasing automatically
+      doc = Nokogiri::XML.fragment(str)
+
+      doc.traverse do |node|
+        node.attributes.each do |name, value|
+          raise TailwindUi::Error, "found camelcase: #{name}" if name.match?(CAMEL_CASE)
+        end
+      end
+    end
 
     def handle_jsx_comments(markup)
       markup
