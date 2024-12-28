@@ -42,7 +42,7 @@ module TailwindUi
       tags = @file_contents.match(/(?<tags> *<.*>)/m)[:tags]
       result = without_indentation(tags)
       result = handle_style_attributes(result)
-      result = with_class_name_conversion(result)
+      result = with_jsx_keywords_updated(result)
       result = handle_jsx_comments(result)
       result = handle_brace_attributes(result)
       result = handle_inner_braces(result)
@@ -74,8 +74,10 @@ module TailwindUi
       markup.gsub("{", "<%= ").gsub("}", " %>")
     end
 
-    def with_class_name_conversion(markup)
-      markup.gsub(/className="([^"]+)"/, 'class="\1"')
+    def with_jsx_keywords_updated(markup)
+      markup
+        .gsub(/className="([^"]+)"/, 'class="\1"')
+        .gsub(/htmlFor="([^"]+)"/, 'for="\1"')
     end
 
     def without_indentation(tags)

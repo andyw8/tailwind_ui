@@ -26,11 +26,11 @@ class JsxToErbTest < Minitest::Test
     assert_equal expected, result
   end
 
-  def test_class_name_handling
+  def test_jsx_keyword_handling
     code = <<~JSX
       export default function Example() {
         return (
-          <div className="foo bar">
+          <div className="foo bar" htmlFor="baz">
             Hello, world!
           </div>
         )
@@ -38,7 +38,7 @@ class JsxToErbTest < Minitest::Test
     JSX
 
     expected = <<~JSX
-      <div class="foo bar">
+      <div class="foo bar" for="baz">
         Hello, world!
       </div>
     JSX
