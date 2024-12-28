@@ -36,6 +36,10 @@ module TailwindUi
         raise ClipPathNotYetSupported
       end
 
+      unless html_match?
+        raise HtmlMatchFail
+      end
+
       @file_contents = file_contents
     end
 

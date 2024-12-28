@@ -122,6 +122,11 @@ class JsxToErbTest < Minitest::Test
     skip "Skipping since SOURCE_PATH is not set" unless ENV["SOURCE_PATH"]
 
     Dir.glob("#{ENV.fetch("SOURCE_PATH")}/**/*.jsx").each do |path|
+      if compare_against_html(path)
+        puts "MATCH: #{path}"
+      else
+        puts "NO MATCH"
+      end
       TailwindUi::JsxToErb.from_path(path).full
       # puts "OK: #{path}"
     rescue TailwindUi::NotYetSupported
@@ -137,5 +142,49 @@ class JsxToErbTest < Minitest::Test
       puts "Clippath not yet supported: #{path}"
       next
     end
+  end
+
+  def squish(s)
+    s.gsub!(/\A[[:space:]]+/, "")
+    s.gsub!(/[[:space:]]+\z/, "")
+    s.gsub!(/[[:space:]]+/, " ")
+    s
+  end
+
+  def compare_against_html(jsx_path)
+    jsx = File.read(jsx_path)
+    converted = TailwindUi::JsxToErb.new(jsx).full
+
+    html_path = jsx_path.gsub("react", "html").gsub(".jsx", ".html")
+    html = File.read(html_path)
+    documents_equivalent?(converted, html)
+  end
+
+  private
+
+  def documents_equivalent?(doc1, doc2)
+    doc1 = Nokogiri::XML.fragment(doc1)
+    doc2 = Nokogiri::XML.fragment(doc2)
+
+    # Normalize both documents
+    doc1.xpath("//text()").each { |node| node.content = node.content.strip }
+    doc2.xpath("//text()").each { |node| node.content = node.content.strip }
+
+    # Sort attributes for consistent comparison
+    doc1.xpath("//*").each do |node|
+      node.attributes.sort_by(&:name).each do |attr|
+        node.set_attribute(attr.name, attr.value)
+      end
+    end
+    doc2.xpath("//*").each do |node|
+      node.attributes.sort_by(&:name).each do |attr|
+        node.set_attribute(attr.name, attr.value)
+      end
+    end
+
+    # Remove whitespace
+    a = doc1.to_xml
+    b = doc2.to_xml
+    a.gsub(/\s+/, "") == b.gsub(/\s+/, "")
   end
 end
