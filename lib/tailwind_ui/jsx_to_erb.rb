@@ -40,17 +40,18 @@ module TailwindUi
     end
 
     def full
-      markup = @file_contents.match(/(?<markup> *<.*>)/m)[:markup]
-      result = without_indentation(markup)
+      tags = @file_contents.match(/(?<tags> *<.*>)/m)[:tags]
+      result = without_indentation(tags)
       result = handle_style_attributes(result)
       result = with_jsx_keywords_updated(result)
       result = convert_camelcase_attributes(result)
-      check_for_missed_camel_case_markup!(result)
+      check_for_missed_camel_case_tags!(result)
       result = handle_jsx_comments(result)
       result = handle_brace_attributes(result)
       result = handle_inner_braces(result)
       raise UnconvertedBraces if result.include?("{") || result.include?("}")
 
+      # Parse the ERB to ensure it's valid
       ERB.new(result).result
 
       result
@@ -77,7 +78,7 @@ module TailwindUi
 
     CAMEL_CASE = /^[a-zA-Z]+([A-Z][a-z]+)+$/
 
-    def check_for_missed_camel_case_markup!(str)
+    def check_for_missed_camel_case_tags!(str)
       # Need to specify XML here to avoid Nokgiri downcasing automatically
       doc = Nokogiri::XML.fragment(str)
 
@@ -113,9 +114,9 @@ module TailwindUi
         .gsub(/htmlFor="([^"]+)"/, 'for="\1"')
     end
 
-    def without_indentation(markup)
-      indentation_level = markup.index("<")
-      markup.lines.map do |line|
+    def without_indentation(tags)
+      indentation_level = tags.index("<")
+      tags.lines.map do |line|
         line[indentation_level..]
       end.join + "\n"
     end
