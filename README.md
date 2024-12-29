@@ -1,6 +1,6 @@
 # tailwind_ui
 
-This gem is for working with [Tailwind UI](https://tailwindui.com).
+This is an unofficial gem is for working with [Tailwind UI](https://tailwindui.com).
 
 ## Installation
 
