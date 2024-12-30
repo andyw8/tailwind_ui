@@ -74,9 +74,6 @@ class JsxToErbTest < Minitest::Test
     rescue TailwindUi::ErbError
       # puts "ErbError: #{path}"
       next
-    rescue SyntaxError
-      puts "Syntax: #{path}"
-      next
     rescue TailwindUi::ClipPathNotYetSupported
       # puts "Clippath not yet supported: #{path}"
       next
