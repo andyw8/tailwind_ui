@@ -124,8 +124,14 @@ class JsxToErbTest < Minitest::Test
     Dir.glob("#{ENV.fetch("SOURCE_PATH")}/**/*.jsx").each do |path|
       TailwindUi::JsxToErb.from_path(path).full
       # puts "OK: #{path}"
+    rescue TailwindUi::NeedsImports
+      # puts "Needs imports: #{path}"
+      next
+    rescue TailwindUi::NeedsData
+      # puts "Needs data: #{path}"
+      next
     rescue TailwindUi::NotYetSupported
-      # puts "Not supported yet: #{path}"
+      puts "Not supported yet: #{path}"
       next
     rescue TailwindUi::Special
       # puts "Special: #{path}"
@@ -134,7 +140,7 @@ class JsxToErbTest < Minitest::Test
       puts "Syntax: #{path}"
       next
     rescue TailwindUi::ClipPathNotYetSupported
-      puts "Clippath not yet supported: #{path}"
+      # puts "Clippath not yet supported: #{path}"
       next
     end
   end

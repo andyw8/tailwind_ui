@@ -14,6 +14,12 @@ module TailwindUi
   class ClipPathNotYetSupported < TailwindUi::Error
   end
 
+  class NeedsImports < TailwindUi::Error
+  end
+
+  class NeedsData < TailwindUi::Error
+  end
+
   class Special < TailwindUi::Error
   end
 
@@ -26,6 +32,14 @@ module TailwindUi
     def initialize(file_contents)
       if file_contents.include?("This example requires updating your template")
         raise Special
+      end
+
+      if file_contents.lines.any? { _1.start_with?("import") }
+        raise NeedsImports
+      end
+
+      if file_contents.lines.any? { _1.start_with?("const") }
+        raise NeedsData
       end
 
       unless file_contents.lines.first.start_with?("export default function")
