@@ -2,6 +2,16 @@
 
 This is an unofficial gem is for working with [Tailwind UI](https://tailwindui.com).
 
+## Overview
+
+Tailwind UI provides code examples in React, Vue and HTML.
+
+The React and Vue examples are structured as templates - there is typically a set of data, followed by some markup which uses that data.
+
+In the HTML examples, the data is already 'rendered' into the markup. This means to use these in a Rails app, you would need modify the markup to add the conditionals, loops, ERB tags, etc.
+
+That's a rather tedious and error-prone process. This gem attempts to do it automatically by converting the JSX template into ERB. The approach is not very sophisticated, mostly just string manipulation.
+
 ## Installation
 
 Install the gem and add to the application's Gemfile by executing:
