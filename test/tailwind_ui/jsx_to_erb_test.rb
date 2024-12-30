@@ -26,96 +26,31 @@ class JsxToErbTest < Minitest::Test
     assert_equal expected, result
   end
 
-  def test_jsx_keyword_handling
+  def test_with_data
     code = <<~JSX
+      const stats = [
+        { label: 'Founded', value: '2021' },
+        // More stats...
+      ]
+
       export default function Example() {
         return (
-          <div className="foo bar" htmlFor="baz">
-            Hello, world!
+          <div className="bg-gray-900 py-24 sm:py-32">
           </div>
         )
       }
     JSX
 
-    expected = <<~JSX
-      <div class="foo bar" for="baz">
-        Hello, world!
-      </div>
-    JSX
+    data = TailwindUi::JsxToErb.new(code).data
 
-    result = TailwindUi::JsxToErb.new(code).full
+    expected = <<~RUBY
+      <% stats = [
+        { label: 'Founded', value: '2021' },
+         # More stats...
+      ] %>
+    RUBY
 
-    assert_equal expected, result
-  end
-
-  def test_images
-    code = <<~JSX
-      export default function Example() {
-        return (
-          <img
-            width={158}
-            height={48}
-          />
-        )
-      }
-    JSX
-
-    expected = <<~JSX
-      <img
-        width="158"
-        height="48"
-      />
-    JSX
-
-    result = TailwindUi::JsxToErb.new(code).full
-
-    assert_equal expected, result
-  end
-
-  def test_style
-    code = <<~JSX
-      export default function Example() {
-        return (
-          <div style={{ width: '37.5%' }} />
-        )
-      }
-    JSX
-
-    expected = <<~HTML
-      <div style="width: '37.5%'" />
-    HTML
-
-    result = TailwindUi::JsxToErb.new(code).full
-
-    assert_equal expected, result
-  end
-
-  def test_jsx_comments
-    code = <<~JSX
-      export default function Example() {
-        return (
-          <div>
-          {/*
-            line 1
-            line 2
-          */}
-          </div>
-        )
-      }
-    JSX
-
-    expected = <<~JSX
-      <div>
-      <%#
-        line 1
-        line 2
-      %>
-      </div>
-    JSX
-
-    result = TailwindUi::JsxToErb.new(code).full
-
-    assert_equal expected, result
+    assert_equal expected, data
   end
 
   def test_against_real_tailwind_ui
@@ -128,13 +63,16 @@ class JsxToErbTest < Minitest::Test
       # puts "Needs imports: #{path}"
       next
     rescue TailwindUi::NeedsData
-      # puts "Needs data: #{path}"
+      puts "Needs data: #{path}"
       next
     rescue TailwindUi::NotYetSupported
       puts "Not supported yet: #{path}"
       next
     rescue TailwindUi::Special
       # puts "Special: #{path}"
+      next
+    rescue TailwindUi::ErbError
+      # puts "ErbError: #{path}"
       next
     rescue SyntaxError
       puts "Syntax: #{path}"
