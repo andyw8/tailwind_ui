@@ -2,6 +2,7 @@ require "erb"
 require "nokogiri"
 require "tailwind_ui/data"
 require "tailwind_ui/markup"
+require "hash_hack"
 
 module TailwindUi
   class Error < StandardError
