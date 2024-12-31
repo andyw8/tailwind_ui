@@ -96,7 +96,7 @@ module TailwindUi
         ERB.new(result).result unless ENV["SKIP_ERB_CHECK"]
         $VERBOSE = 1
       rescue Exception => e # rubocop:disable Lint/RescueException
-        raise ErbError # , e.message
+        raise ErbError, e.message
       end
 
       result

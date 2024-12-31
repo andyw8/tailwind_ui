@@ -3,7 +3,7 @@
 class Hash
   class NoKeyOrMethodError < NoMethodError; end
 
-  def method_missing(method, *args)
+  def method_missing(method, *args) # standard:disable Style/MissingRespondToMissing
     m = method.to_s
     string_key = m.gsub(/=$/, "")
     sym_key = string_key.to_sym
