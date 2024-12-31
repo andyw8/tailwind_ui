@@ -6,17 +6,36 @@ module TailwindUi
 
     def result
       result = without_indentation
+      result = handle_ruby_code(result)
       result = handle_style_attributes(result)
       result = convert_camelcase_attributes(result)
       result = handle_jsx_comments(result)
 
       result = handle_brace_attributes(result)
-      handle_inner_braces(result)
+      result = handle_inner_braces(result)
+      check_for_missed_braces!(result)
+      result
     end
 
     private
 
     attr_reader :tags
+
+    def check_for_missed_braces!(result)
+      # binding.irb
+      if result.include?("{") || result.include?("}")
+        raise UnconvertedBraces
+      end
+    end
+
+    def handle_ruby_code(markup)
+      markup
+        .gsub(/{(\w+).map\(\((\w+)\) => \(/, '<% \1.each do |\2| %>')
+        .gsub(/{(\w+).each\(\((\w+)\) => \(/, '<% \1.each do |\2| %>')
+        .gsub("))}", "<% end %>")
+        .gsub(/{(.*) \? (.*) : null}/, '<% if \1 %>\2<% end %>')
+      # binding.irb
+    end
 
     def convert_camelcase_attributes(markup)
       result = markup

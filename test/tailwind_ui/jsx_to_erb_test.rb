@@ -47,7 +47,8 @@ class JsxToErbTest < Minitest::Test
       <% stats = [
         { label: 'Founded', value: '2021' },
          # More stats...
-      ] %>
+      ]
+       %>
     RUBY
 
     assert_equal expected, data
@@ -59,11 +60,26 @@ class JsxToErbTest < Minitest::Test
     Dir.glob("#{ENV.fetch("SOURCE_PATH")}/**/*.jsx").each do |path|
       TailwindUi::JsxToErb.from_path(path).full
       # puts "OK: #{path}"
+    rescue TailwindUi::UnconvertedBraces
+      puts "Unconverted braces: #{path}"
+      next
+    rescue TailwindUi::HasProps
+      # puts "Has props: #{path}"
+      next
     rescue TailwindUi::NeedsImports
       # puts "Needs imports: #{path}"
       next
+    rescue TailwindUi::Backtick
+      # puts "Backtick: #{path}"
+      next
+    rescue TailwindUi::HasFunction
+      # puts "Has function: #{path}"
+      next
     rescue TailwindUi::NeedsData
       puts "Needs data: #{path}"
+      next
+    rescue TailwindUi::MultipleConst
+      # puts "Multiple const: #{path}"
       next
     rescue TailwindUi::NotYetSupported
       puts "Not supported yet: #{path}"

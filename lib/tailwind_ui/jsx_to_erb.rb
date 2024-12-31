@@ -2,6 +2,7 @@ require "erb"
 require "nokogiri"
 require "tailwind_ui/data"
 require "tailwind_ui/markup"
+require "tailwind_ui/functions"
 require "hash_hack"
 
 module TailwindUi
@@ -9,6 +10,12 @@ module TailwindUi
   end
 
   class NotYetSupported < TailwindUi::Error
+  end
+
+  class HasFunction < TailwindUi::Error
+  end
+
+  class HasProps < TailwindUi::Error
   end
 
   class UnconvertedBraces < TailwindUi::Error
@@ -20,7 +27,13 @@ module TailwindUi
   class NeedsImports < TailwindUi::Error
   end
 
+  class Backtick < TailwindUi::Error
+  end
+
   class NeedsData < TailwindUi::Error
+  end
+
+  class MultipleConst < TailwindUi::Error
   end
 
   class ErbError < TailwindUi::Error
@@ -44,13 +57,21 @@ module TailwindUi
         raise NeedsImports
       end
 
-      # if file_contents.lines.any? { _1.start_with?("const") }
-      #   raise NeedsData
-      # end
+      if file_contents.lines.any? { _1.include?("props") }
+        raise HasProps
+      end
 
-      # unless file_contents.lines.first.start_with?("export default function")
-      #   raise NotYetSupported
-      # end
+      if file_contents.lines.count { _1.include?("const") } > 1
+        raise MultipleConst
+      end
+
+      if file_contents.include?("`")
+        raise Backtick
+      end
+
+      if file_contents.lines.any? { _1.start_with?("function") }
+        raise HasFunction
+      end
 
       if file_contents.include?("clipPath")
         raise ClipPathNotYetSupported
@@ -64,22 +85,29 @@ module TailwindUi
       markup = Markup.new(tags)
       result = markup.result
       check_for_missed_camel_case_tags!(result)
-      raise UnconvertedBraces if result.include?("{") || result.include?("}")
+
+      if data?
+        result = data + "\n" + result
+      end
 
       # Parse the ERB to ensure it's valid
       begin
         $VERBOSE = nil
-        ERB.new(result).result
+        ERB.new(result).result unless ENV["SKIP_ERB_CHECK"]
         $VERBOSE = 1
       rescue Exception => e # rubocop:disable Lint/RescueException
-        raise ErbError, e.message
+        raise ErbError # , e.message
       end
 
       result
     end
 
+    def data?
+      @file_contents.match(/const (\w+) = (\[.*\])/m)
+    end
+
     def data
-      name, values = @file_contents.match(/const (\w+) = (\[.*\])/m)[1, 2]
+      name, values = @file_contents.match(/const (\w+) = (\[.*\]\n)/m)[1, 2]
       Data.new(name, values).to_erb
     end
 

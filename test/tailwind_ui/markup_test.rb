@@ -34,7 +34,6 @@ class MarkupTest < Minitest::Test
     HTML
 
     result = TailwindUi::Markup.new(code).result.chomp
-    # binding.irb
 
     assert_equal expected, result
   end
@@ -93,6 +92,46 @@ class MarkupTest < Minitest::Test
         line 1
         line 2
       %>
+      </div>
+    JSX
+
+    result = TailwindUi::Markup.new(code).result
+
+    assert_equal expected, result.chomp
+  end
+
+  def test_ruby_code
+    code = <<~JSX
+      <div>
+        {stats.map((item) => (
+          <dd>foo</dd>
+        ))}
+      </div>
+    JSX
+
+    expected = <<~JSX
+      <div>
+        <% stats.each do |item| %>
+          <dd>foo</dd>
+        <% end %>
+      </div>
+    JSX
+
+    result = TailwindUi::Markup.new(code).result
+
+    assert_equal expected, result.chomp
+  end
+
+  def test_ruby_code_ternary_with_null
+    code = <<~JSX
+      <div>
+        {stat.unit ? <span>{stat.unit}</span> : null}
+      </div>
+    JSX
+
+    expected = <<~JSX
+      <div>
+        <% if stat.unit %><span><%= stat.unit %></span><% end %>
       </div>
     JSX
 
